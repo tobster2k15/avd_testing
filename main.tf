@@ -80,7 +80,7 @@ module "avd" {
   failedSessionHostCleanupPolicy = "KeepNone"
   avdUsers                       = [""]
   scalingPlan = {
-    enabled = false
+    enabled = true
     details = {}
   }
   depends_on = [ module.keyVault,  ]
