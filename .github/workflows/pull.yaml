@@ -16,9 +16,9 @@ permissions:
 jobs: 
   pr-infra-check:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./infra
+    # defaults:
+    #   run:
+    #     working-directory: ./infra
     
     steps:
 
