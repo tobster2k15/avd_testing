@@ -16,11 +16,21 @@ permissions:
 jobs: 
   pr-infra-check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+    
     steps:
+
+    - name: Debug File Path
+      run: |
+        pwd
+        ls -la
+        find modules -maxdepth 2 -type f | head -50
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
-
+  
     # Install the latest version of Terraform CLI 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
@@ -99,3 +109,42 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
+
+
+#### to test
+
+# jobs:
+  # pr-infra-check:
+  #   runs-on: ubuntu-latest
+
+  #   defaults:
+  #     run:
+  #       working-directory: ./infra
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: 1.9.8
+
+  #     - name: Azure Login
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  #     - name: Terraform Init
+  #       run: terraform init
+
+  #     - name: Terraform Validate
+  #       run: terraform validate
+
+  #     - name: Debug files
+  #       run: |
+  #         pwd
+  #         ls -la
+  #         find modules -maxdepth 2 -type f | head -50
