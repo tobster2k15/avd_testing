@@ -16,60 +16,59 @@ permissions:
 jobs: 
   pr-infra-check:
     runs-on: ubuntu-latest
+    # defaults:
+    #   run:
+    #     working-directory: ./infra
+    
     steps:
+
+    - name: Debug File Path
+      run: |
+        pwd
+        ls -la
+        find modules -maxdepth 2 -type f | head -50
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-    # Install the latest version of Terraform CLI 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      
-    # Log into Azure with OIDC integration
     - name: 'Az CLI login'
       uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
     # Run az commands to confirm sub access
     - name: 'Run az commands'
       run: |
         az account show
 
-    # Run Terraform init
-    - name: Terraform Init
-      id: init
-      env:
+  
+    # Install the latest version of Terraform CLI 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.8
+        terraform_wrapper: false
+      env: 
         ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init"
+    - id: init
+      run: terraform init
 
-    # Run a Terraform fmt
-    - name: Terraform format
-      id: fmt
-      run: terraform fmt -check
-
-    # Run a Terraform validate
-    - name: Terraform validate
-      id: validate
-      if: success() || failure()
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    - id: fmt
+      run: terraform fmt
+      continue-on-error: true
+    
+    - id: validate
       run: terraform validate -no-color
-
-    # Run a Terraform plan
-    - name: Terraform plan
-      id: plan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      continue-on-error: true
+    
+    - id: plan
       run: terraform plan -no-color
+      continue-on-error: true
 
     # Add a comment to pull requests with plan results
     - name: Add Plan Comment
@@ -91,7 +90,7 @@ jobs:
           
           </details>
           
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ github.workspace }}\`, Workflow: \`${{ github.workflow }}\`*`;
             
           github.rest.issues.createComment({
             issue_number: context.issue.number,

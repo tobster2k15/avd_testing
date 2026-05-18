@@ -48,8 +48,8 @@ module "keyVault" {
 }
 
 module "avd" {
-    source = "./modules/zmg-it-wp-terraform-avd-session-host-config-module"
-    resource_group_name = azurerm_resource_group.this["dev"].name
+  source = "./modules/zmg-it-wp-terraform-avd-session-host-config-module"
+  resource_group_name = azurerm_resource_group.this["dev"].name
   company             = var.company
   environment         = "prd"
   usecase             = var.usecase
@@ -80,8 +80,10 @@ module "avd" {
   failedSessionHostCleanupPolicy = "KeepNone"
   avdUsers                       = [""]
   scalingPlan = {
-    enabled = false
+    enabled = true
     details = {}
   }
   depends_on = [ module.keyVault,  ]
 }
+
+## test
