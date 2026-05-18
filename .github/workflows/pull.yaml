@@ -33,7 +33,9 @@ jobs:
   
     # Install the latest version of Terraform CLI 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.8
       
     # Log into Azure with OIDC integration
     - name: 'Az CLI login'
